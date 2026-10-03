@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>五大湖环线 · 3 天</title>
+<style>
+  :root{
+    --bg:#eef2f0; --panel:#ffffff; --ink:#17201d; --muted:#6b7a75;
+    --line:#e2e8e5; --evergreen:#1f7a5c; --ocean:#2a7fb8; --sunset:#e8825a; --charge:#c8463c;
+    --chip:#f1f5f3; --shadow:0 8px 30px rgba(20,40,35,.10); --radius:16px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0e1512; --panel:#151d1a; --ink:#e8efec; --muted:#93a49e;
+      --line:#25322e; --chip:#1c2723; --shadow:0 10px 34px rgba(0,0,0,.4);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased; display:flex; flex-direction:column; min-height:100%;
+  }
+  header{background:linear-gradient(115deg,var(--evergreen),var(--ocean));color:#fff;padding:18px 22px}
+  header .kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.85}
+  header h1{margin:4px 0 2px;font-size:23px;font-weight:700}
+  header .sub{font-size:13.5px;opacity:.92}
+  .strip{display:flex;gap:8px;overflow-x:auto;padding:12px 22px 14px;background:var(--panel);border-bottom:1px solid var(--line);scrollbar-width:thin}
+  .strip::-webkit-scrollbar{height:6px}
+  .strip::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  .tab{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:8px 13px;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:74px;transition:.15s;font:inherit;text-align:left}
+  .tab:hover{border-color:var(--evergreen)}
+  .tab .d{font-weight:700;font-size:14px;line-height:1}
+  .tab .w{font-size:11px;color:var(--muted)}
+  .tab.active{background:var(--evergreen);border-color:var(--evergreen);color:#fff}
+  .tab.active .w{color:rgba(255,255,255,.85)}
+  .tab.ov{min-width:64px}
+  main{flex:1;display:grid;grid-template-columns:1.55fr 1fr;gap:16px;padding:16px 22px 22px;min-height:0}
+  .mapwrap{position:relative;background:var(--panel);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);display:flex;flex-direction:column;min-height:460px}
+  #map{flex:1;width:100%;background:var(--chip)}
+  .triptime{position:absolute;top:12px;left:12px;z-index:4;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:6px 11px;font-size:12.5px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.14);pointer-events:none}
+  .triptime:empty{display:none}
+  .mapbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+  .mapbar a{color:#fff;background:var(--ocean);text-decoration:none;padding:7px 12px;border-radius:9px;font-weight:600;font-size:12.5px;white-space:nowrap}
+  .mapbar a:hover{filter:brightness(1.06)}
+  .legend{display:flex;gap:12px;flex-wrap:wrap}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .dot{width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}
+  /* overlay for key help */
+  .overlay{position:absolute;inset:0;background:var(--panel);display:flex;align-items:center;justify-content:center;padding:26px;z-index:5;overflow:auto}
+  .overlay .box{max-width:460px}
+  .overlay h3{margin:0 0 8px;font-size:17px}
+  .overlay p{font-size:13.5px;color:var(--muted);line-height:1.6;margin:8px 0}
+  .overlay ol{font-size:13.5px;line-height:1.7;padding-left:20px;margin:10px 0}
+  .overlay li{margin-bottom:7px}
+  .overlay a{color:var(--ocean)}
+  .overlay code{background:var(--chip);padding:2px 6px;border-radius:5px;font-size:12.5px;word-break:break-all}
+  .overlay .tip{font-size:12.5px;background:var(--chip);border-radius:9px;padding:9px 11px}
+  .hidden{display:none!important}
+  /* panel */
+  .panel{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--line);overflow:auto;padding:18px 18px 24px;min-height:0}
+  .panel h2{margin:0 0 2px;font-size:19px}
+  .panel .route{color:var(--evergreen);font-weight:700;font-size:14px;margin-bottom:8px}
+  .panel .note{background:var(--chip);border-radius:11px;padding:10px 12px;font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:16px}
+  .sec{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 0 9px;font-weight:700}
+  .card{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);border-left:4px solid var(--evergreen);border-radius:11px;padding:11px 12px;margin-bottom:9px;text-decoration:none;color:inherit;transition:.15s;background:var(--panel)}
+  a.card:hover{transform:translateX(2px);border-color:var(--evergreen)}
+  .card.hotel{border-left-color:var(--sunset)}
+  .card.suggest{border-left-color:var(--ocean);border-left-style:dashed}
+  .card.stop{border-left-color:var(--muted)}
+  .card.charge{border-left-color:var(--charge)}
+  .card.charge .num{background:var(--charge)}
+  .card .num{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--evergreen);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .card.suggest .num{background:var(--ocean)}
+  .card.stop .num{background:var(--muted)}
+  .card .ico{font-size:18px;line-height:1.2}
+  .card .body{flex:1;min-width:0}
+  .card .nm{font-weight:600;font-size:14.5px}
+  .card .meta{font-size:12px;color:var(--muted);margin-top:2px}
+  .badge{display:inline-block;background:var(--chip);color:var(--muted);font-size:11px;padding:2px 7px;border-radius:6px;margin:5px 5px 0 0;font-weight:600}
+  .card .go{color:var(--muted);font-size:12px;align-self:center;white-space:nowrap}
+  .hlinks{margin-top:7px;display:flex;gap:14px;flex-wrap:wrap}
+  .hlinks a{font-size:12px;text-decoration:none;font-weight:600}
+  .ovday{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:9px;cursor:pointer;transition:.15s;background:var(--panel)}
+  .ovday:hover{border-color:var(--evergreen);transform:translateX(2px)}
+  .ovday .dd{flex:0 0 auto;width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--evergreen),var(--ocean));color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+  .ovday .dd b{font-size:15px}.ovday .dd span{font-size:10px;opacity:.85;margin-top:2px}
+  .ovday .oc{flex:1;min-width:0}
+  .ovday .oc .r{font-weight:600;font-size:14.5px}
+  .ovday .oc .s{font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .foot{padding:6px 22px 18px;color:var(--muted);font-size:12px;text-align:center}
+  @media (max-width:880px){
+    html,body{height:auto}
+    body{min-height:100vh}
+    main{display:block;flex:none;padding:12px 14px 22px}
+    .mapwrap{min-height:0;height:52vh;margin-bottom:12px}
+    .panel{overflow:visible;max-height:none;min-height:0}
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="kicker">Great Lakes Road Trip</div>
+    <h1>五大湖公路环线 🌊⚡</h1>
+    <div class="sub">3 天 2 晚 · Columbus 出发,经 Mackinac 大桥绕上半岛,回 Columbus</div>
+  </header>
+
+  <nav class="strip" id="strip"></nav>
+
+  <main>
+    <div class="mapwrap">
+      <div id="map"></div>
+      <div id="tripTime" class="triptime"></div>
+      <div class="overlay" id="overlay"></div>
+      <div class="mapbar">
+        <div class="legend">
+          <span><i class="dot" style="background:#1f7a5c"></i>打卡点</span>
+          <span><i class="dot" style="background:#c8463c"></i>充电</span>
+          <span><i class="dot" style="background:#e8825a"></i>住宿</span>
+        </div>
+        <a id="openMaps" target="_blank" rel="noopener">在 Google 地图打开 ↗</a>
+      </div>
+    </div>
+    <aside class="panel" id="panel"></aside>
+  </main>
+
+  <div class="foot" id="foot"></div>
+
+<script>
+/* ==========================================================================
+   ①  把你的 Google Maps API Key 填进下面的引号里,保存后刷新页面即可。
+       (拿 key 的步骤:没填时地图区域会显示图文教程)
+   ========================================================================== */
+const GOOGLE_MAPS_API_KEY = "AIzaSyDEgM9ak-YVLqLVKfHE3FU9nGlwE5umR68";
+
+/* ==========================================================================
+   ②  行程数据 —— 每天:从上一晚酒店出发 → 沿途打卡 → 今晚酒店。
+       stop:  { name, q(地图搜索词), tag:'sight'|'suggest'|'stop', badge }
+       hotel: { name, sub, q, bf, extra, url }
+   ========================================================================== */
+const DAYS = [
+  {
+    id:1, date:"Day 1", wd:"第 1 天", title:"Columbus → Mackinaw City",
+    from:{name:"Columbus", q:"Columbus, OH"},
+    to:{name:"Ramada Mackinaw City", q:"Ramada by Wyndham Mackinaw City Waterfront, 723 S Huron Ave, Mackinaw City, MI 49701"},
+    note:"一路沿 I-75 北上:Toledo 附近先充一次,中途在 Ann Arbor 停车逛密大校园,出城前补电,再经 Bay City、Gaylord 两次充电,晚上到 Mackinaw City 湖边酒店。",
+    stops:[
+      {name:"Tesla 超充 · Maumee(Toledo)", q:"Tesla Supercharger, 1391 Conant St, Maumee, OH 43537", tag:"charge"},
+      {name:"Ann Arbor · 密大校园(Lot M28 停车)", q:"1500 Washington Heights, Ann Arbor, MI 48103", tag:"sight"},
+      {name:"Tesla 超充 · Ann Arbor", q:"Tesla Supercharger, 3145 Ann Arbor-Saline Rd, Ann Arbor, MI 48103", tag:"charge"},
+      {name:"Tesla 超充 · Bay City", q:"Tesla Supercharger, 2980 Wilder Rd, Bay City, MI 48706", tag:"charge"},
+      {name:"Tesla 超充 · Gaylord", q:"Tesla Supercharger, 250 Meijer Dr, Gaylord, MI 49735", tag:"charge"}
+    ],
+    hotel:{name:"Ramada by Wyndham Mackinaw City Waterfront", sub:"Mackinaw City · 湖边", q:"Ramada by Wyndham Mackinaw City Waterfront, 723 S Huron Ave, Mackinaw City, MI 49701", bf:false}
+  },
+  {
+    id:2, date:"Day 2", wd:"第 2 天", title:"Mackinaw City → Ashland",
+    from:{name:"Ramada Mackinaw City", q:"Ramada by Wyndham Mackinaw City Waterfront, 723 S Huron Ave, Mackinaw City, MI 49701"},
+    to:{name:"Super 8 Ashland", q:"Super 8 by Wyndham Ashland, 1610 Lake Shore Dr W, Ashland, WI 54806"},
+    note:"出发前在酒店旁充满电,过 Mackinac 大桥(收费)到 St. Ignace 看桥,再去 Pictured Rocks 的 Miners Castle。在 Marquette 充电后直接开到 Ashland 补电,回头往东去 Porcupine Mountains 看 Lake of the Clouds,然后回 Ashland 再充一次过夜。绕回头路是因为 Porcupine Mountains 附近没有超充。注意:进入 Wisconsin 后是中部时间,比密歇根晚 1 小时。",
+    stops:[
+      {name:"Tesla 超充 · Mackinaw City", q:"Tesla Supercharger, 801 S Huron Ave, Mackinaw City, MI 49701", tag:"charge"},
+      {name:"Bridge View Park · St. Ignace", q:"Bridge View Park, W69 Boulevard Dr, St Ignace, MI 49781", tag:"sight", badge:"🌉 过 Mackinac 大桥(收费)"},
+      {name:"Miners Castle · Pictured Rocks", q:"Miners Castle Point, Munising, MI 49862", tag:"sight"},
+      {name:"Tesla 超充 · Marquette", q:"Tesla Supercharger, 3630 US-41, Marquette, MI 49855", tag:"charge"},
+      {name:"Kwik Trip 充电 · Ashland(去程)", q:"Kwik Trip, 1814 Lake Shore Dr W, Ashland, WI 54806", tag:"charge"},
+      {name:"Lake of the Clouds Overlook", q:"Lake of the Clouds Overlook, Ontonagon, MI 49953", tag:"sight", badge:"⛰️ Porcupine Mountains"},
+      {name:"Kwik Trip 充电 · Ashland(回程)", q:"Kwik Trip, 1814 Lake Shore Dr W, Ashland, WI 54806", tag:"charge"}
+    ],
+    hotel:{name:"Super 8 by Wyndham Ashland", sub:"Ashland, WI · 苏必利尔湖边", q:"Super 8 by Wyndham Ashland, 1610 Lake Shore Dr W, Ashland, WI 54806", bf:false}
+  },
+  {
+    id:3, date:"Day 3", wd:"第 3 天", title:"Ashland → Columbus",
+    from:{name:"Super 8 Ashland", q:"Super 8 by Wyndham Ashland, 1610 Lake Shore Dr W, Ashland, WI 54806"},
+    to:{name:"Columbus(到家)", q:"Columbus, OH"},
+    note:"全程最长的一天(约 810 英里、纯开车近 13 小时)。建议一早出发,中午前后过芝加哥,避开早晚高峰;Illinois Tollway 收费,可用 E-ZPass/I-PASS 或事后按车牌网上补交。Fair Oaks Farms 记得确认最后入场时间。进入 Indiana 东部后改回东部时间,表上会多走 1 小时。",
+    stops:[
+      {name:"Tesla 超充 · Wausau", q:"Tesla Supercharger, 2101 N Mountain Rd, Wausau, WI 54401", tag:"charge"},
+      {name:"Tesla 超充 · Janesville", q:"Tesla Supercharger, 2819 N Lexington Dr, Janesville, WI 53545", tag:"charge"},
+      {name:"Fair Oaks Farms", q:"Fair Oaks Farms, 856 N 600 E, Fair Oaks, IN 47943", tag:"sight", badge:"🐄 农场参观 · 约 2–3 小时"},
+      {name:"Fishers 停靠(用途待定)", q:"11665 Commercial Dr, Fishers, IN 46038", tag:"stop"}
+    ],
+    hotel:null
+  }
+];
+
+/* 总览:出发 + 每晚过夜酒店 + 返回;总路线由每天的路线叠加得到(见 updateMap) */
+const OVERVIEW = [
+  {q:"Columbus, OH", name:"Columbus · 出发", kind:"start"},
+  {q:"Ramada by Wyndham Mackinaw City Waterfront, 723 S Huron Ave, Mackinaw City, MI 49701", name:"Day 1 宿 · Mackinaw City", kind:"hotel"},
+  {q:"Super 8 by Wyndham Ashland, 1610 Lake Shore Dr W, Ashland, WI 54806", name:"Day 2 宿 · Ashland", kind:"hotel"},
+  {q:"Columbus, OH", name:"Day 3 · 回到 Columbus", kind:"end"}
+];
+
+/* ---- 通用工具 ---- */
+const enc = encodeURIComponent;
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const COLOR = {sight:'#1f7a5c', suggest:'#2a7fb8', stop:'#6b7a75', charge:'#c8463c', hotel:'#e8825a', start:'#8a938f'};
+function dirLink(qs){ return 'https://www.google.com/maps/dir/' + qs.map(enc).join('/'); }
+function placeLink(q){ return 'https://www.google.com/maps/search/?api=1&query=' + enc(q); }
+function stopLabels(d){ let n=0; return d.stops.map(s=>s.tag==='charge'?'⚡':String(++n)); }
+function dayQs(d){ return [d.from.q, ...d.stops.filter(s=>s.route!==false).map(s=>s.q), d.to.q]; }
+
+/* 生成一天/总览的「点位 + 标记元数据」 */
+function pointsFor(id){
+  if(id==='ov'){
+    const M={start:{c:COLOR.start,l:'起',k:'start'}, end:{c:COLOR.start,l:'返',k:'start'},
+             hotel:{c:COLOR.hotel,l:'宿',k:'hotel'}, via:{c:COLOR.sight,l:'途',k:'sight'}};
+    return OVERVIEW.map(o=>({ q:o.q, title:o.name, color:M[o.kind].c, label:M[o.kind].l, kind:M[o.kind].k }));
+  }
+  const d = DAYS.find(x=>x.id===id);
+  const arr = [{q:d.from.q, title:d.from.name, color:COLOR.start, label:'起', kind:'start'}];
+  stopLabels(d).forEach((lab,i)=>{ const s=d.stops[i]; arr.push({
+    q:s.q, title:s.name, color:COLOR[s.tag]||COLOR.sight,
+    label:lab, kind:'sight', badge:s.badge, suggest:s.tag==='suggest', charge:s.tag==='charge',
+    route:s.route!==false
+  }); });
+  arr.push(d.hotel?{q:d.to.q, title:d.to.name, color:COLOR.hotel, label:'宿', kind:'hotel', hotel:d.hotel}
+                 :{q:d.to.q, title:d.to.name, color:COLOR.start, label:'终', kind:'start'});
+  return arr;
+}
+
+/* ======================= 侧栏渲染 ======================= */
+const strip=document.getElementById('strip'), panel=document.getElementById('panel'),
+      openA=document.getElementById('openMaps'), overlay=document.getElementById('overlay'),
+      tripEl=document.getElementById('tripTime');
+let currentSel='ov';
+
+function buildTabs(){
+  const ov=document.createElement('button');
+  ov.className='tab ov'; ov.dataset.id='ov';
+  ov.innerHTML=`<span class="d">总览</span><span class="w">全程</span>`;
+  ov.onclick=()=>select('ov'); strip.appendChild(ov);
+  DAYS.forEach(d=>{
+    const b=document.createElement('button'); b.className='tab'; b.dataset.id=d.id;
+    b.innerHTML=`<span class="d">${d.date}</span><span class="w">${d.wd}</span>`;
+    b.onclick=()=>select(d.id); strip.appendChild(b);
+  });
+}
+function stopCard(s,i){
+  const cls=s.tag==='suggest'?'suggest':s.tag==='stop'?'stop':s.tag==='charge'?'charge':'';
+  const badge=s.badge?`<div class="badge">${s.badge}</div>`:'';
+  const tag=s.tag==='suggest'?'<div class="meta">推荐 · 可选</div>':s.tag==='charge'?'<div class="meta">充电</div>':'';
+  return `<a class="card ${cls}" href="${esc(placeLink(s.q))}" target="_blank" rel="noopener">
+    <span class="num">${i}</span>
+    <span class="body"><div class="nm">${s.name}</div>${tag}${badge}</span>
+    <span class="go">地图 ↗</span></a>`;
+}
+function hotelCard(h){
+  if(!h) return `<div class="card" style="opacity:.75"><span class="ico">🧳</span>
+    <span class="body"><div class="nm">回到 Columbus · 行程结束</div><div class="meta">最后一天不住酒店,直接开回家</div></span></div>`;
+  const bf=h.bf?'<span class="badge">🥐 含早餐</span>':'';
+  const extra=h.extra?`<span class="badge">${h.extra}</span>`:'';
+  return `<div class="card hotel"><span class="ico">🏨</span>
+    <span class="body"><div class="nm">${h.name}</div><div class="meta">${h.sub||''}</div>
+      <div>${bf}${extra}</div>
+      <div class="hlinks">
+        <a href="${esc(placeLink(h.q))}" target="_blank" rel="noopener" style="color:var(--muted)">📍 地图</a>
+        ${h.url?`<a href="${esc(h.url)}" target="_blank" rel="noopener" style="color:var(--ocean)">🔗 Expedia 预订</a>`:''}
+      </div></span></div>`;
+}
+function renderDayPanel(d){
+  panel.innerHTML=`
+    <div class="route">${d.date} ${d.wd}</div>
+    <h2>${d.from.name} → ${d.to.name}</h2>
+    <div class="note">${d.note}</div>
+    <div class="sec">📍 沿途停靠(${d.stops.filter(s=>s.tag!=='charge').length} 个打卡 · ${d.stops.filter(s=>s.tag==='charge').length} 次充电)</div>
+    ${(L=>d.stops.map((s,i)=>stopCard(s,L[i])).join(''))(stopLabels(d))}
+    <div class="sec">${d.hotel?"🏨 今晚住宿":"🏁 终点"}</div>
+    ${hotelCard(d.hotel)}`;
+}
+function renderOverviewPanel(){
+  const list=DAYS.map(d=>`
+    <div class="ovday" data-id="${d.id}">
+      <div class="dd"><b>${d.date}</b><span>${d.wd}</span></div>
+      <div class="oc"><div class="r">${d.title}</div>
+        <div class="s">🏨 ${d.hotel?d.hotel.name:'回到 Columbus'}</div></div>
+      <span class="go" style="color:var(--muted)">›</span></div>`).join('');
+  panel.innerHTML=`
+    <h2>全程总览 · 3 天 2 晚</h2>
+    <div class="route">Columbus ↺ Michigan · Upper Peninsula · Wisconsin</div>
+    <div class="note">每天从上一晚酒店出发,沿途打卡,晚上到下一家酒店。点任意一天查看当天路线、景点与住宿。</div>
+    ${list}`;
+  panel.querySelectorAll('.ovday').forEach(el=>el.onclick=()=>select(Number(el.dataset.id)));
+}
+
+function select(id){
+  currentSel=id;
+  strip.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.id==String(id)));
+  if(id==='ov'){ renderOverviewPanel(); openA.href=dirLink(OVERVIEW.map(o=>o.q)); }
+  else { const d=DAYS.find(x=>x.id===id); renderDayPanel(d); openA.href=dirLink(dayQs(d)); }
+  panel.scrollTop=0;
+  updateMap(id);
+}
+
+/* ======================= Google 地图 ======================= */
+let mapsReady=false, gmap, gDir, gGeo, gInfo, gLines=[], gMarkers=[], mapToken=0;
+const geoCache={};
+
+function onMapsReady(){
+  gmap=new google.maps.Map(document.getElementById('map'),{
+    center:{lat:44.0,lng:-86.5}, zoom:6,
+    mapTypeControl:false, streetViewControl:false, fullscreenControl:true, gestureHandling:'greedy'
+  });
+  gDir=new google.maps.DirectionsService();
+  gGeo=new google.maps.Geocoder();
+  gInfo=new google.maps.InfoWindow();
+  mapsReady=true;
+  overlay.classList.add('hidden');
+  updateMap(currentSel);
+}
+window.onMapsReady=onMapsReady;
+window.gm_authFailure=()=>showOverlay('auth');
+
+function geocode(q){
+  if(geoCache[q]) return Promise.resolve(geoCache[q]);
+  return new Promise(res=>{
+    gGeo.geocode({address:q, region:'us'},(r,st)=>{
+      if(st==='OK'&&r[0]){ geoCache[q]=r[0].geometry.location; res(r[0].geometry.location); }
+      else res(null);
+    });
+  });
+}
+function clearMap(){
+  gMarkers.forEach(m=>m.setMap(null)); gMarkers=[];
+  gLines.forEach(l=>l.setMap(null)); gLines=[];
+  if(gInfo) gInfo.close();
+}
+function infoHtml(m){
+  let extra='';
+  if(m.kind==='hotel'&&m.hotel) extra+=`<div style="font-size:12px;color:#777;margin-top:3px">🏨 今晚住宿${m.hotel.bf?' · 含早餐':''}</div>`;
+  if(m.badge) extra+=`<div style="font-size:12px;color:#777;margin-top:3px">${m.badge}</div>`;
+  if(m.charge) extra+=`<div style="font-size:12px;color:#c8463c;margin-top:3px">⚡ 充电站</div>`;
+  if(m.suggest) extra+=`<div style="font-size:12px;color:#2a7fb8;margin-top:3px">推荐 · 可选</div>`;
+  return `<div style="font:13px/1.5 -apple-system,sans-serif;max-width:190px;color:#222">
+    <b>${esc(m.title)}</b>${extra}
+    <div style="margin-top:6px"><a href="${esc(placeLink(m.q))}" target="_blank" style="color:#2a7fb8;text-decoration:none">在 Google 地图打开 ↗</a></div></div>`;
+}
+function fmtDur(sec){ let h=Math.floor(sec/3600), m=Math.round((sec%3600)/60); if(m===60){h++;m=0;} if(h&&m)return `${h} 小时 ${m} 分`; if(h)return `${h} 小时`; return `${m} 分`; }
+function sumRoute(res){ let sec=0,m=0; res.routes[0].legs.forEach(l=>{sec+=l.duration.value; m+=l.distance.value;}); return {sec,m}; }
+function setTrip(sec,m,isOv){ tripEl.textContent=`🚗 ${isOv?'全程车程':'今日车程'}约 ${fmtDur(sec)} · ${Math.round(m/1609.34)} 英里`; }
+function dayRoutablePts(d){
+  return [{q:d.from.q,title:d.from.name}, ...d.stops.filter(s=>s.route!==false).map(s=>({q:s.q,title:s.name})), {q:d.to.q,title:d.to.name}];
+}
+function drawLegs(res, pts){
+  res.routes[0].legs.forEach((leg,i)=>{
+    const path=[]; leg.steps.forEach(s=>s.path.forEach(p=>path.push(p)));
+    if(!path.length) return;
+    const a=pts[i]?pts[i].title:'', b=pts[i+1]?pts[i+1].title:'';
+    // 可见细线
+    const vis=new google.maps.Polyline({map:gmap, path, strokeColor:'#2a7fb8', strokeOpacity:.9, strokeWeight:5, clickable:false, zIndex:1});
+    // 透明粗线,专门接管鼠标(目标区大,好点)
+    const hit=new google.maps.Polyline({map:gmap, path, strokeOpacity:0, strokeWeight:18, clickable:true, zIndex:3});
+    hit.addListener('mouseover',()=>vis.setOptions({strokeWeight:8, strokeColor:'#1c6fa0'}));
+    hit.addListener('mouseout',()=>vis.setOptions({strokeWeight:5, strokeColor:'#2a7fb8'}));
+    hit.addListener('click',(e)=>{
+      gInfo.setContent(`<div style="font:13px/1.5 -apple-system,sans-serif;color:#222;max-width:220px"><b>${esc(a)} → ${esc(b)}</b><div style="margin-top:4px;color:#2a7fb8;font-weight:700">🚗 ${leg.duration.text} · ${leg.distance.text}</div></div>`);
+      gInfo.setPosition(e.latLng); gInfo.open(gmap);
+    });
+    gLines.push(vis, hit);
+  });
+}
+async function updateMap(id){
+  if(!mapsReady) return;
+  clearMap();
+  const meta=pointsFor(id);
+  const coords=await Promise.all(meta.map(m=>geocode(m.q)));
+  if(currentSel!==id) return; // 期间又切换了,放弃这次
+  const bounds=new google.maps.LatLngBounds();
+  meta.forEach((m,i)=>{
+    const pos=coords[i]; if(!pos) return;
+    bounds.extend(pos);
+    const big=(m.kind!=='sight');
+    const mk=new google.maps.Marker({
+      position:pos, map:gmap, title:m.title,
+      zIndex: m.kind==='hotel'?4:m.kind==='start'?2:3,
+      icon:{path:google.maps.SymbolPath.CIRCLE, scale:big?13:11,
+        fillColor:m.color, fillOpacity:1, strokeColor:'#ffffff', strokeWeight:2.5},
+      label:{text:m.label, color:'#ffffff', fontSize:m.label.length>1&&m.label!=='⚡'?'11px':'12px', fontWeight:'700'}
+    });
+    mk.addListener('click',()=>{ gInfo.setContent(infoHtml(m)); gInfo.open({anchor:mk, map:gmap}); });
+    gMarkers.push(mk);
+  });
+  if(!bounds.isEmpty()) gmap.fitBounds(bounds, 64);
+  // 路线(逐段可点击查看时长/距离)+ 车程预估
+  tripEl.textContent='🚗 车程计算中…';
+  const token=++mapToken;
+  const drawRoute=(pts,onDone)=>{
+    if(pts.length<2){ if(onDone) onDone(null); return; }
+    const qs=pts.map(p=>p.q);
+    const req={origin:qs[0], destination:qs[qs.length-1],
+      waypoints:qs.slice(1,-1).map(q=>({location:q, stopover:true})),
+      travelMode:google.maps.TravelMode.DRIVING, unitSystem:google.maps.UnitSystem.IMPERIAL};
+    const run=(n)=>gDir.route(req,(res,st)=>{
+      if(token!==mapToken) return;
+      if(st==='OK'){ drawLegs(res, pts); if(onDone) onDone(res); }
+      else if(st==='OVER_QUERY_LIMIT' && n<4){ setTimeout(()=>run(n+1), 400*n); }
+    });
+    run(1);
+  };
+  if(id==='ov'){
+    const ovb=new google.maps.LatLngBounds(), tot={sec:0,m:0};
+    DAYS.forEach((d,i)=>setTimeout(()=>{
+      if(token!==mapToken) return;
+      drawRoute(dayRoutablePts(d),(res)=>{ if(token!==mapToken||!res) return;
+        ovb.union(res.routes[0].bounds); gmap.fitBounds(ovb,40);
+        const s=sumRoute(res); tot.sec+=s.sec; tot.m+=s.m; setTrip(tot.sec,tot.m,true);
+      });
+    }, i*280));
+  } else {
+    drawRoute(meta.filter(m=>m.route!==false),(res)=>{ if(res){ const s=sumRoute(res); setTrip(s.sec,s.m,false); } });
+  }
+}
+
+/* ======================= 加载脚本 / 提示 ======================= */
+function showOverlay(kind){
+  let html;
+  if(kind==='auth') html=`<div class="box"><h3>⚠️ API Key 无效或未授权</h3>
+    <p>请确认这个 key 已经启用了 <b>Maps JavaScript API</b>、<b>Directions API</b>、<b>Geocoding API</b> 三个服务,且 key 填写正确。改好后刷新页面。</p></div>`;
+  else if(kind==='load') html=`<div class="box"><h3>⚠️ 地图脚本加载失败</h3>
+    <p>请检查网络连接,以及顶部的 <code>GOOGLE_MAPS_API_KEY</code> 是否填写正确,然后刷新页面。</p></div>`;
+  else html=`<div class="box">
+    <h3>🔑 需要一个免费的 Google Maps API Key</h3>
+    <p>地图标记功能要用 Google 的 Maps API。拿 key 约 2–3 分钟,个人本地使用在免费额度内基本不花钱:</p>
+    <ol>
+      <li>打开 <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a> 登录</li>
+      <li>顶部新建一个项目(或选已有的)</li>
+      <li>「API 和服务」→「库」,搜索并<b>启用</b>这三个:<b>Maps JavaScript API</b>、<b>Directions API</b>、<b>Geocoding API</b></li>
+      <li>「API 和服务」→「凭据」→「创建凭据」→「API 密钥」,复制生成的 key</li>
+      <li>用编辑器打开本文件,把顶部这行的引号填上 key:<br><code>const GOOGLE_MAPS_API_KEY = "把key填这里";</code><br>保存后刷新页面即可</li>
+    </ol>
+    <p class="tip">🔒 安全建议:在 key 的「API 限制」里只勾选上面三个 API。本地文件用「网站来源」限制不方便,先用 API 限制即可。</p></div>`;
+  overlay.innerHTML=html; overlay.classList.remove('hidden');
+}
+function loadMaps(){
+  if(!GOOGLE_MAPS_API_KEY){ showOverlay('need'); return; }
+  const s=document.createElement('script');
+  s.src=`https://maps.googleapis.com/maps/api/js?key=${enc(GOOGLE_MAPS_API_KEY)}&callback=onMapsReady&language=zh-CN&region=US`;
+  s.async=true; s.defer=true; s.onerror=()=>showOverlay('load');
+  document.head.appendChild(s);
+}
+
+/* ======================= 启动 ======================= */
+buildTabs();
+select('ov');
+document.getElementById('foot').textContent='绿色=打卡点,红色⚡=充电,橙色=当晚住宿,灰色=出发/其他停靠 · 点标记看名字和链接';
+loadMaps();
+</script>
+</body>
+</html>
