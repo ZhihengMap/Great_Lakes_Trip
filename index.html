@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>五大湖环线 · 3 天</title>
+<title>五大湖环线 · 10.3–10.5</title>
 <style>
   :root{
     --bg:#eef2f0; --panel:#ffffff; --ink:#17201d; --muted:#6b7a75;
@@ -104,7 +104,7 @@
   <header>
     <div class="kicker">Great Lakes Road Trip</div>
     <h1>五大湖公路环线 🌊⚡</h1>
-    <div class="sub">3 天 2 晚 · Columbus 出发,经 Mackinac 大桥绕上半岛,回 Columbus</div>
+    <div class="sub">10 月 3 – 5 日 · 3 天 2 晚 · Columbus 出发,经 Mackinac 大桥绕上半岛,回 Columbus</div>
   </header>
 
   <nav class="strip" id="strip"></nav>
@@ -142,9 +142,9 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyDEgM9ak-YVLqLVKfHE3FU9nGlwE5umR68";
    ========================================================================== */
 const DAYS = [
   {
-    id:1, date:"Day 1", wd:"第 1 天", title:"Columbus → Mackinaw City",
+    id:1, date:"10.3", wd:"周六", title:"Columbus → Mackinaw City",
     from:{name:"Columbus", q:"Columbus, OH"},
-    to:{name:"Ramada Mackinaw City", q:"Ramada by Wyndham Mackinaw City Waterfront, 723 S Huron Ave, Mackinaw City, MI 49701"},
+    to:{name:"Super 8 Mackinaw City", q:"Super 8 by Wyndham Mackinaw City Beachfront Area, 519 S Huron Ave, Mackinaw City, MI 49701"},
     note:"一路沿 I-75 北上:Toledo 附近先充一次,中途在 Ann Arbor 停车逛密大校园,出城前补电,再经 Bay City、Gaylord 两次充电,晚上到 Mackinaw City 湖边酒店。",
     stops:[
       {name:"Tesla 超充 · Maumee(Toledo)", q:"Tesla Supercharger, 1391 Conant St, Maumee, OH 43537", tag:"charge"},
@@ -153,13 +153,14 @@ const DAYS = [
       {name:"Tesla 超充 · Bay City", q:"Tesla Supercharger, 2980 Wilder Rd, Bay City, MI 48706", tag:"charge"},
       {name:"Tesla 超充 · Gaylord", q:"Tesla Supercharger, 250 Meijer Dr, Gaylord, MI 49735", tag:"charge"}
     ],
-    hotel:{name:"Ramada by Wyndham Mackinaw City Waterfront", sub:"Mackinaw City · 湖边", q:"Ramada by Wyndham Mackinaw City Waterfront, 723 S Huron Ave, Mackinaw City, MI 49701", bf:false}
+    hotel:{name:"Super 8 by Wyndham Mackinaw City Beachfront Area", sub:"Mackinaw City · 湖边", q:"Super 8 by Wyndham Mackinaw City Beachfront Area, 519 S Huron Ave, Mackinaw City, MI 49701", bf:false,
+      url:"https://www.wyndhamhotels.com/super-8/mackinaw-city-michigan/super-8-macknaw-city-beachfront-area/overview"}
   },
   {
-    id:2, date:"Day 2", wd:"第 2 天", title:"Mackinaw City → Ashland",
-    from:{name:"Ramada Mackinaw City", q:"Ramada by Wyndham Mackinaw City Waterfront, 723 S Huron Ave, Mackinaw City, MI 49701"},
+    id:2, date:"10.4", wd:"周日", title:"Mackinaw City → Ashland",
+    from:{name:"Super 8 Mackinaw City", q:"Super 8 by Wyndham Mackinaw City Beachfront Area, 519 S Huron Ave, Mackinaw City, MI 49701"},
     to:{name:"Super 8 Ashland", q:"Super 8 by Wyndham Ashland, 1610 Lake Shore Dr W, Ashland, WI 54806"},
-    note:"出发前在酒店旁充满电,过 Mackinac 大桥(收费)到 St. Ignace 看桥,再去 Pictured Rocks 的 Miners Castle。在 Marquette 充电后直接开到 Ashland 补电,回头往东去 Porcupine Mountains 看 Lake of the Clouds,然后回 Ashland 再充一次过夜。绕回头路是因为 Porcupine Mountains 附近没有超充。注意:进入 Wisconsin 后是中部时间,比密歇根晚 1 小时。",
+    note:"出发前先去镇上的超充充满电,过 Mackinac 大桥(收费)到 St. Ignace 看桥,再去 Pictured Rocks 的 Miners Castle。在 Marquette 充电后直接开到 Ashland 补电,回头往东去 Porcupine Mountains 看 Lake of the Clouds,然后回 Ashland 再充一次过夜。绕回头路是因为 Porcupine Mountains 附近没有超充。注意:进入 Wisconsin 后是中部时间,比密歇根晚 1 小时。",
     stops:[
       {name:"Tesla 超充 · Mackinaw City", q:"Tesla Supercharger, 801 S Huron Ave, Mackinaw City, MI 49701", tag:"charge"},
       {name:"Bridge View Park · St. Ignace", q:"Bridge View Park, W69 Boulevard Dr, St Ignace, MI 49781", tag:"sight", badge:"🌉 过 Mackinac 大桥(收费)"},
@@ -169,10 +170,11 @@ const DAYS = [
       {name:"Lake of the Clouds Overlook", q:"Lake of the Clouds Overlook, Ontonagon, MI 49953", tag:"sight", badge:"⛰️ Porcupine Mountains"},
       {name:"Kwik Trip 充电 · Ashland(回程)", q:"Kwik Trip, 1814 Lake Shore Dr W, Ashland, WI 54806", tag:"charge"}
     ],
-    hotel:{name:"Super 8 by Wyndham Ashland", sub:"Ashland, WI · 苏必利尔湖边", q:"Super 8 by Wyndham Ashland, 1610 Lake Shore Dr W, Ashland, WI 54806", bf:false}
+    hotel:{name:"Super 8 by Wyndham Ashland", sub:"Ashland, WI · 苏必利尔湖边", q:"Super 8 by Wyndham Ashland, 1610 Lake Shore Dr W, Ashland, WI 54806", bf:false,
+      url:"https://www.wyndhamhotels.com/super-8/ashland-wisconsin/super-8-ashland-wi/overview"}
   },
   {
-    id:3, date:"Day 3", wd:"第 3 天", title:"Ashland → Columbus",
+    id:3, date:"10.5", wd:"周一", title:"Ashland → Columbus",
     from:{name:"Super 8 Ashland", q:"Super 8 by Wyndham Ashland, 1610 Lake Shore Dr W, Ashland, WI 54806"},
     to:{name:"Columbus(到家)", q:"Columbus, OH"},
     note:"全程最长的一天(约 810 英里、纯开车近 13 小时)。建议一早出发,中午前后过芝加哥,避开早晚高峰;Illinois Tollway 收费,可用 E-ZPass/I-PASS 或事后按车牌网上补交。Fair Oaks Farms 记得确认最后入场时间。进入 Indiana 东部后改回东部时间,表上会多走 1 小时。",
@@ -189,9 +191,9 @@ const DAYS = [
 /* 总览:出发 + 每晚过夜酒店 + 返回;总路线由每天的路线叠加得到(见 updateMap) */
 const OVERVIEW = [
   {q:"Columbus, OH", name:"Columbus · 出发", kind:"start"},
-  {q:"Ramada by Wyndham Mackinaw City Waterfront, 723 S Huron Ave, Mackinaw City, MI 49701", name:"Day 1 宿 · Mackinaw City", kind:"hotel"},
-  {q:"Super 8 by Wyndham Ashland, 1610 Lake Shore Dr W, Ashland, WI 54806", name:"Day 2 宿 · Ashland", kind:"hotel"},
-  {q:"Columbus, OH", name:"Day 3 · 回到 Columbus", kind:"end"}
+  {q:"Super 8 by Wyndham Mackinaw City Beachfront Area, 519 S Huron Ave, Mackinaw City, MI 49701", name:"10.3 宿 · Mackinaw City", kind:"hotel"},
+  {q:"Super 8 by Wyndham Ashland, 1610 Lake Shore Dr W, Ashland, WI 54806", name:"10.4 宿 · Ashland", kind:"hotel"},
+  {q:"Columbus, OH", name:"10.5 · 回到 Columbus", kind:"end"}
 ];
 
 /* ---- 通用工具 ---- */
@@ -258,7 +260,7 @@ function hotelCard(h){
       <div>${bf}${extra}</div>
       <div class="hlinks">
         <a href="${esc(placeLink(h.q))}" target="_blank" rel="noopener" style="color:var(--muted)">📍 地图</a>
-        ${h.url?`<a href="${esc(h.url)}" target="_blank" rel="noopener" style="color:var(--ocean)">🔗 Expedia 预订</a>`:''}
+        ${h.url?`<a href="${esc(h.url)}" target="_blank" rel="noopener" style="color:var(--ocean)">🔗 酒店官网</a>`:''}
       </div></span></div>`;
 }
 function renderDayPanel(d){
